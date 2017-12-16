@@ -1,18 +1,59 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 
 export default class CommentInput extends Component {
-    constructor () {
-        super();
+
+
+    static defaultProps = {
+        username: ''
+    };
+
+    static propTypes = {
+        username: PropTypes.any,
+        onSubmit: PropTypes.func.isRequired,
+        onUserNameInputBlur: PropTypes.func.isRequired
+    };
+
+    constructor (props) {
+        super(props);
         this.state = {
-            username: '',
+            username: props.username,
             content: ''
         }
     }
+
+    componentWillMount () {
+        // this._loadUsername();
+    }
+
+    componentDidMount () {
+        this.textarea.focus();
+    }
+
+    // _loadUsername () {
+    //     const username = localStorage.getItem('username');
+    //     if(username) {
+    //         this.setState({
+    //             username
+    //         })
+    //     }
+    // }
+
+    // _saveUsername(username) {
+    //     localStorage.setItem('username',username);
+    // }
 
     handleUsernameChange (e) {
         this.setState ({
             username: e.target.value
         })
+    }
+
+    handleUsernameBlur (e) {
+        // this._saveUsername(e.target.value);
+        if (this.props.onUserNameInputBlur) {
+            this.props.onUserNameInputBlur(e.target.value)
+        }
     }
 
     handleContentChange (event) {
@@ -23,8 +64,13 @@ export default class CommentInput extends Component {
 
     handleSubmit () {
         if(this.props.onSubmit) {
-            const {username,content} = this.state;
-            this.props.onSubmit({username,content});
+            // const {username,content} = this.state;
+            // this.props.onSubmit({username,content});
+            this.props.onSubmit({
+                username: this.state.username,
+                content: this.state.content,
+                createdTime: +new Date()
+            });
         }
         this.setState({content: ''});
     }
@@ -35,13 +81,21 @@ export default class CommentInput extends Component {
                 <div className='comment-field'>
                     <span className='comment-field-name'>用户名：</span>
                     <div className='comment-field-input'>
-                        <input value={this.state.username} onChange={this.handleUsernameChange.bind(this)}  />
+                        <input
+                            value={this.state.username}
+                            onBlur={this.handleUsernameBlur.bind(this)}
+                            onChange={this.handleUsernameChange.bind(this)}  />
                     </div>
                 </div>
                 <div className='comment-field'>
                     <span className='comment-field-name'>评论内容：</span>
                     <div className='comment-field-input'>
-                        <textarea value={this.state.content} onChange={this.handleContentChange.bind(this)} />
+                        <textarea
+                            ref={(textarea)=>{
+                                this.textarea = textarea;
+                            }}
+                            value={this.state.content}
+                            onChange={this.handleContentChange.bind(this)} />
                     </div>
                 </div>
                 <div className='comment-field-button'>
